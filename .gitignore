@@ -1,0 +1,19 @@
+# OCaml build artifacts
+_build/
+*.install
+*.merlin
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secret Sauce :)
+lib/utils/daily_selector.ml

@@ -1,0 +1,6 @@
+(executable
+ (public_name asoiafdle)
+ (name main)
+ (libraries asoiafdle dream)
+ (preprocess
+  (pps ppx_rapper ppx_yojson_conv lwt_ppx)))

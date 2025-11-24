@@ -1,0 +1,14 @@
+(executable
+ (name test_seed)
+ (libraries asoiafdle)
+ (modules test_seed))
+
+(rule
+ (alias runtest-db)
+ (deps
+  (source_tree ../../resources))
+ (action
+  (progn
+   (system
+    "mkdir -p resources && cp ../../resources/* resources/ 2>/dev/null || true")
+   (run %{exe:test_seed.exe}))))

@@ -1,0 +1,30 @@
+(executable
+ (name test_game)
+ (libraries asoiafdle)
+ (modules test_game))
+
+(executable
+ (name test_characters)
+ (libraries asoiafdle)
+ (modules test_characters))
+
+(rule
+ (alias runtest)
+ (deps
+  (source_tree ../resources))
+ (action
+  (progn
+   (system
+    "mkdir -p resources && cp ../resources/* resources/ 2>/dev/null || true")
+   (run %{exe:test_game.exe})
+   (run %{exe:test_characters.exe}))))
+
+;; Run all test suites
+
+(alias
+ (name runtest-all)
+ (deps
+  (alias_rec runtest)
+  (alias_rec runtest-core)
+  (alias_rec runtest-utils)
+  (alias_rec runtest-db)))

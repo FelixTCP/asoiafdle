@@ -1,0 +1,16 @@
+(executable
+ (name test_password)
+ (libraries asoiafdle lwt lwt.unix)
+ (modules test_password))
+
+(executable
+ (name test_daily_selector)
+ (libraries asoiafdle)
+ (modules test_daily_selector))
+
+(rule
+ (alias runtest-utils)
+ (action
+  (progn
+   (run %{exe:test_password.exe})
+   (run %{exe:test_daily_selector.exe}))))

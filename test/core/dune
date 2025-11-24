@@ -1,0 +1,20 @@
+(executable
+ (name test_game)
+ (libraries asoiafdle)
+ (modules test_game))
+
+(executable
+ (name test_models)
+ (libraries asoiafdle)
+ (modules test_models))
+
+(rule
+ (alias runtest-core)
+ (deps
+  (source_tree ../../resources))
+ (action
+  (progn
+   (system
+    "mkdir -p resources && cp ../../resources/* resources/ 2>/dev/null || true")
+   (run %{exe:test_game.exe})
+   (run %{exe:test_models.exe}))))
