@@ -24,6 +24,7 @@
   dream
   caqti
   caqti-lwt
+  caqti-lwt-unix
   caqti-driver-sqlite3
   ppx_rapper
   safepass
