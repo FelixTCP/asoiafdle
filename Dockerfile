@@ -21,6 +21,7 @@ WORKDIR /home/opam/app
 COPY --chown=opam:opam dune-project asoiafdle.opam ./
 
 # Install dependencies
+ENV OPAMSOLVERTIMEOUT=300
 RUN opam install . --deps-only
 
 # Copy the rest of the source code
