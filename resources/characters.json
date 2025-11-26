@@ -145,7 +145,7 @@
     {
         "name": "Osha",
         "allegience": "Stark",
-        "region": "The North",
+        "region": "Beyond the Wall",
         "gender": "Female",
         "status": "Alive",
         "first_appearance": "A Game of Thrones",
@@ -479,14 +479,14 @@
         "gender": "Male",
         "status": "Alive",
         "first_appearance": "A Game of Thrones",
-        "title": "Ser",
+        "title": "Lord",
         "age_bracket": "Adult",
         "last_seen": "Crownlands"
     },
     {
         "name": "Shae",
         "allegience": "Lannister",
-        "region": "Free Cities",
+        "region": "Crownlands",
         "gender": "Female",
         "status": "Dead",
         "first_appearance": "A Game of Thrones",
@@ -529,7 +529,7 @@
     },
     {
         "name": "Joffrey Baratheon",
-        "allegience": "Baratheon",
+        "allegience": "Lannister",
         "region": "Crownlands",
         "gender": "Male",
         "status": "Dead",
@@ -540,7 +540,7 @@
     },
     {
         "name": "Myrcella Baratheon",
-        "allegience": "Baratheon",
+        "allegience": "Lannister",
         "region": "Crownlands",
         "gender": "Female",
         "status": "Alive",
@@ -551,7 +551,7 @@
     },
     {
         "name": "Tommen Baratheon",
-        "allegience": "Baratheon",
+        "allegience": "Lannister",
         "region": "Crownlands",
         "gender": "Male",
         "status": "Alive",
@@ -622,7 +622,7 @@
         "gender": "Female",
         "status": "Alive",
         "first_appearance": "A Clash of Kings",
-        "title": "None",
+        "title": "Priest",
         "age_bracket": "Unknown",
         "last_seen": "The Wall"
     },
@@ -633,7 +633,7 @@
         "gender": "Male",
         "status": "Alive",
         "first_appearance": "A Clash of Kings",
-        "title": "Pirate",
+        "title": "None",
         "age_bracket": "Adult",
         "last_seen": "Stepstones"
     },
@@ -669,17 +669,6 @@
         "title": "Lord",
         "age_bracket": "Adult",
         "last_seen": "Crownlands"
-    },
-    {
-        "name": "Willas Tyrell",
-        "allegience": "Tyrell",
-        "region": "The Reach",
-        "gender": "Male",
-        "status": "Alive",
-        "first_appearance": "Mentioned",
-        "title": "Lord",
-        "age_bracket": "Adult",
-        "last_seen": "The Reach"
     },
     {
         "name": "Garlan Tyrell",
@@ -919,7 +908,7 @@
         "gender": "Male",
         "status": "Alive",
         "first_appearance": "A Clash of Kings",
-        "title": "None",
+        "title": "Priest",
         "age_bracket": "Adult",
         "last_seen": "Iron Islands"
     },
@@ -1799,7 +1788,7 @@
         "gender": "Male",
         "status": "Alive",
         "first_appearance": "A Dance with Dragons",
-        "title": "None",
+        "title": "Priest",
         "age_bracket": "Adult",
         "last_seen": "Slavers Bay"
     },
@@ -2147,7 +2136,7 @@
     {
         "name": "Haldon",
         "allegience": "Targaryen",
-        "region": "Unknown",
+        "region": "Westeros",
         "gender": "Male",
         "status": "Alive",
         "first_appearance": "A Dance with Dragons",

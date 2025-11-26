@@ -30,7 +30,8 @@
   yojson
   ppx_yojson_conv
   lwt
-  lwt_ppx)
+  lwt_ppx
+  tyxml)
  (tags
   ("asoiaf" "wordle" "game" "htmx" "dream")))
 

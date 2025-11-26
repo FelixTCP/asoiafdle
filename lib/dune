@@ -10,7 +10,8 @@
   safepass
   yojson
   ppx_yojson_conv
-  lwt)
+  lwt
+  tyxml)
  (preprocess
   (pps ppx_rapper ppx_yojson_conv lwt_ppx)))
 

@@ -22,6 +22,7 @@ depends: [
   "ppx_yojson_conv"
   "lwt"
   "lwt_ppx"
+  "tyxml"
   "odoc" {with-doc}
 ]
 build: [
