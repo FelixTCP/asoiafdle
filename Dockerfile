@@ -12,7 +12,8 @@ RUN sudo apt-get update && sudo apt-get install -y \
     libsqlite3-dev \
     pkg-config \
     libssl-dev \
-    libgmp-dev
+    libgmp-dev \
+    libffi-dev
 
 # Set working directory
 WORKDIR /home/opam/app
