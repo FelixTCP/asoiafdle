@@ -1,31 +1,8 @@
-# Build stage
-FROM ocaml/opam:debian-12-ocaml-5.1 AS build
-
-# Install system dependencies
-# libev-dev: for Dream (lwt_ppx/libev)
-# libsqlite3-dev: for caqti-driver-sqlite3
-# pkg-config: for finding libraries
-# libssl-dev: for SSL support
-# libgmp-dev: for zarith/mirage-crypto if needed
-RUN sudo apt-get update && sudo apt-get install -y \
-    libev-dev \
-    libsqlite3-dev \
-    pkg-config \
-    libssl-dev \
-    libgmp-dev \
-    libffi-dev
+# Use pre-built base image
+FROM ghcr.io/felixtcp/asoiafdle-base:latest AS build
 
 # Set working directory
 WORKDIR /home/opam/app
-
-# Copy opam files first to cache dependencies
-COPY --chown=opam:opam dune-project asoiafdle.opam ./
-
-# Install dependencies
-ENV OPAMSOLVERTIMEOUT=600
-ENV OPAMJOBS=4
-RUN sudo apt-get update && opam update
-RUN opam install . --deps-only --jobs=4
 
 # Copy the rest of the source code
 COPY --chown=opam:opam . .
