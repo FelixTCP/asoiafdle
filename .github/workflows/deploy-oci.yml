@@ -71,8 +71,11 @@ jobs:
           # Login to GHCR
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
+          # Define lowercase image name
+          IMAGE_NAME=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          
           # Pull latest image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          docker pull $IMAGE_NAME
           
           # Stop and remove old container
           docker stop asoiafdle 2>/dev/null || true
@@ -88,7 +91,8 @@ jobs:
             -p 80:8080 \
             -v ~/asoiafdle-data:/app/data \
             -e DATABASE_PATH=/app/data/asoiafdle.db \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
+            $IMAGE_NAME:latest
           
           # Clean up old images
           docker image prune -f
