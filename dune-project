@@ -23,7 +23,8 @@
   ocaml
   dream
   caqti
-  caqti-lwt
+  (caqti-lwt
+   (>= 2.0.0))
   caqti-driver-sqlite3
   ppx_rapper
   safepass

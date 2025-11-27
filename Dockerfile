@@ -22,9 +22,10 @@ WORKDIR /home/opam/app
 COPY --chown=opam:opam dune-project asoiafdle.opam ./
 
 # Install dependencies
-ENV OPAMSOLVERTIMEOUT=300
+ENV OPAMSOLVERTIMEOUT=600
+ENV OPAMJOBS=4
 RUN sudo apt-get update && opam update
-RUN opam install . --deps-only
+RUN opam install . --deps-only --jobs=4
 
 # Copy the rest of the source code
 COPY --chown=opam:opam . .
