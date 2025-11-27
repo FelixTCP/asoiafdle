@@ -30,6 +30,15 @@ RUN opam install . --deps-only --jobs=4
 # Copy the rest of the source code
 COPY --chown=opam:opam . .
 
+# Decrypt the secret file
+ARG DAILY_SELECTOR_KEY
+RUN if [ -f lib/utils/daily_selector.ml.enc ]; then \
+    openssl enc -aes-256-cbc -d -pbkdf2 \
+    -in lib/utils/daily_selector.ml.enc \
+    -out lib/utils/daily_selector.ml \
+    -k "${DAILY_SELECTOR_KEY}"; \
+    fi
+
 # Build the project
 RUN opam exec -- dune build
 
