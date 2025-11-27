@@ -68,6 +68,9 @@ COPY --from=build /home/opam/app/_build/default/bin/main.exe /app/asoiafdle
 # Copy static assets
 COPY --from=build /home/opam/app/static /app/static
 
+# Copy resources (characters.json, etc.)
+COPY --from=build /home/opam/app/resources /app/resources
+
 # Copy database schema (needed for auto-migration on startup)
 COPY --from=build /home/opam/app/schema.sql /app/schema.sql
 
