@@ -19,6 +19,9 @@ RUN if [ -f lib/utils/daily_selector.ml.enc ]; then \
 # Build the project
 RUN opam exec -- dune build
 
+# Run tests - fail build if tests fail
+RUN opam exec -- dune runtest
+
 # Build Tailwind CSS
 # Ensure the binary is executable
 RUN chmod +x tailwindcss-linux-x64 && \

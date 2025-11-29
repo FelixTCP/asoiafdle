@@ -38,20 +38,28 @@ let register_post request =
        let email = List.assoc "email" fields in
        let nickname = List.assoc "nickname" fields in
        let password = List.assoc "password" fields in
-       Dream.sql request (fun db ->
-         match%lwt Auth_db.get_user_by_email db email with
-         | Some _ ->
-           Dream.html (Auth_views.register_page ~error:"Email already registered" request)
-         | None ->
-           let%lwt password_hash = Password.hash_password password in
-           (match%lwt Auth_db.create_user db ~email ~password_hash ~nickname with
-            | Ok _ -> Dream.redirect request "/login"
-            | Error err ->
-              let error_msg =
-                Printf.sprintf "Registration failed: %s" (Caqti_error.show err)
-              in
-              Dream.log "Error creating user: %s" error_msg;
-              Dream.html (Auth_views.register_page ~error:error_msg request)))
+       let confirm_password = List.assoc "confirm_password" fields in
+       (* Validate password confirmation *)
+       if password <> confirm_password
+       then Dream.html (Auth_views.register_page ~error:"Passwords do not match" request)
+       else
+         Dream.sql request (fun db ->
+           match%lwt Auth_db.get_user_by_email db email with
+           | Some _ ->
+             Dream.html
+               (Auth_views.register_page ~error:"Email already registered" request)
+           | None ->
+             let%lwt password_hash = Password.hash_password password in
+             (match%lwt Auth_db.create_user db ~email ~password_hash ~nickname with
+              | Ok _ ->
+                let%lwt () = Metrics_db.increment_counter db "total_registrations" in
+                Dream.redirect request "/login"
+              | Error err ->
+                Dream.log "Error creating user: %s" (Caqti_error.show err);
+                Dream.html
+                  (Auth_views.register_page
+                     ~error:"Registration failed. Please try again later."
+                     request)))
      with
      | Not_found ->
        Dream.html (Auth_views.register_page ~error:"Missing required fields" request))

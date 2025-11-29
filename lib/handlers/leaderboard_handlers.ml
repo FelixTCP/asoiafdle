@@ -77,17 +77,28 @@ let add_friend req =
                      "<div class='text-yellow-500'>You cannot add yourself as a \
                       friend!</div>"
                  else (
-                   match%lwt Leaderboard_db.add_friend db user_id friend.Models.id with
-                   | Ok () ->
+                   let%lwt is_friend =
+                     Leaderboard_db.is_already_friend db user_id friend.Models.id
+                   in
+                   if is_friend
+                   then
                      Dream.html
                        (Printf.sprintf
-                          "<div class='text-green-500'>Successfully added %s as a \
-                           friend!</div>"
+                          "<div class='text-yellow-500'>%s is already your friend!</div>"
                           friend.Models.nickname)
-                   | Error _ ->
-                     Dream.html
-                       "<div class='text-red-500'>Failed to add friend (already \
-                        friends?)</div>")
+                   else (
+                     match%lwt Leaderboard_db.add_friend db user_id friend.Models.id with
+                     | Ok () ->
+                       Dream.html
+                         (Printf.sprintf
+                            "<div class='text-green-500'>Successfully added %s as a \
+                             friend!</div>"
+                            friend.Models.nickname)
+                     | Error err ->
+                       Dream.log "Error adding friend: %s" (Caqti_error.show err);
+                       Dream.html
+                         "<div class='text-red-500'>Failed to add friend. Please try \
+                          again later.</div>"))
                | None ->
                  Dream.html "<div class='text-red-500'>Friend code not found</div>")
            with

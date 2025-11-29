@@ -105,61 +105,42 @@ let save_game_query =
   let open Caqti_request.Infix in
   (Caqti_type.t6
      Caqti_type.int
-     Caqti_type.int
+     Caqti_type.string
      Caqti_type.int
      Caqti_type.string
      Caqti_type.string
      Caqti_type.bool
    ->. Caqti_type.unit)
   @@ "INSERT OR REPLACE INTO games  \n\
-     \  (user_id, character_id, guesses, guess_names, date,won)  \n\
+     \  (user_id, character_name, guesses, guess_names, date, won)  \n\
      \  VALUES (?, ?, ?, ?, ?, ?)"
 ;;
 
 let save_game
       (module Db : Caqti_lwt.CONNECTION)
       ~user_id
-      ~character_id
+      ~character_name
       ~guesses
       ~guess_names
       ~date
       ~won
   =
-  Db.exec save_game_query (user_id, character_id, guesses, guess_names, date, won)
+  Db.exec save_game_query (user_id, character_name, guesses, guess_names, date, won)
 ;;
 
 let get_today_game_query =
   let open Caqti_request.Infix in
   (Caqti_type.t2 Caqti_type.int Caqti_type.string
    ->? Caqti_type.t5
-         Caqti_type.int
+         Caqti_type.string
          Caqti_type.int
          Caqti_type.(option string)
          Caqti_type.bool
          Caqti_type.string)
-  @@ "SELECT character_id, guesses, guess_names, won, date FROM games \n\
+  @@ "SELECT character_name, guesses, guess_names, won, date FROM games \n\
      \  WHERE user_id = ? AND date = ?"
 ;;
 
 let get_today_game (module Db : Caqti_lwt.CONNECTION) ~user_id ~date =
   Db.find_opt get_today_game_query (user_id, date)
-;;
-
-let get_game_guesses_query =
-  let open Caqti_request.Infix in
-  (Caqti_type.t2 Caqti_type.int Caqti_type.string
-   ->? Caqti_type.t3 Caqti_type.string Caqti_type.int Caqti_type.bool)
-  @@ "SELECT COALESCE((SELECT GROUP_CONCAT(name, '|') FROM (\n\
-     \        SELECT name FROM characters c \n\
-     \        JOIN games g ON g.character_id = c.id \n\
-     \        WHERE g.user_id = ? AND g.date = ?\n\
-     \        LIMIT g.guesses\n\
-     \      )), '') as guess_names,\n\
-     \      COALESCE(guesses, 0) as num_guesses,\n\
-     \      COALESCE(won, 0) as won\n\
-     \     FROM games WHERE user_id = ? AND date = ? LIMIT 1"
-;;
-
-let get_game_guesses (module Db : Caqti_lwt.CONNECTION) ~user_id ~date =
-  Db.find_opt get_game_guesses_query (user_id, date)
 ;;

@@ -61,6 +61,17 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Copy config files to OCI
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.OCI_HOST }}
+        username: ${{ secrets.OCI_USER }}
+        key: ${{ secrets.OCI_SSH_PRIVATE_KEY }}
+        source: "docker-compose.yml,monitoring/"
+        target: "~/asoiafdle"
     - name: Deploy to OCI via SSH
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -71,32 +82,34 @@ jobs:
           # Login to GHCR
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           
-          # Define lowercase image name
-          IMAGE_NAME=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          # Create app directory
+          mkdir -p ~/asoiafdle/monitoring
+          cd ~/asoiafdle
           
-          # Pull latest image
-          docker pull $IMAGE_NAME
-          
-          # Stop and remove old container
-          docker stop asoiafdle 2>/dev/null || true
-          docker rm asoiafdle 2>/dev/null || true
-          
-          # Create data directory if it doesn't exist
+          # Create data directories
           mkdir -p ~/asoiafdle-data
           
-          # Run new container
-          docker run -d \
-            --name asoiafdle \
-            --restart unless-stopped \
-            -p 127.0.0.1:8080:8080 \
-            -v ~/asoiafdle-data:/app/data \
-            -e DATABASE_PATH=/app/data/asoiafdle.db \
-            -e SESSION_SECRET="${{ secrets.SESSION_SECRET }}" \
-            $IMAGE_NAME:latest
+          # Pull latest images
+          docker compose pull
           
-          # Clean up old images
+          # Start services
+          # This will recreate containers if image changed
+          SESSION_SECRET="${{ secrets.SESSION_SECRET }}" docker compose up -d
+          
+          # Prune old images
           docker image prune -f
           
-          # Show status
-          echo "Deployment complete!"
-          docker ps --filter name=asoiafdle
+          # Health check
+          echo "Waiting for health check..."
+          for i in {1..30}; do
+            if curl -f http://localhost:8080/health &>/dev/null; then
+              echo "✅ Health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+          
+          echo "❌ Health check failed!"
+          docker compose logs app
+          exit 1

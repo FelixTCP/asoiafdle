@@ -21,7 +21,7 @@ let index req =
          (* Load today's game from database *)
          let%lwt game_opt = Db.get_today_game db ~user_id:id ~date:today in
          match game_opt with
-         | Ok (Some (_char_id, _num_guesses, guess_names_opt, won, _date)) ->
+         | Ok (Some (_character_name, _num_guesses, guess_names_opt, won, _date)) ->
            (* Game exists in DB - load it *)
            let guesses_list =
              match guess_names_opt with
@@ -33,6 +33,8 @@ let index req =
                 | _ -> [])
              | None -> []
            in
+           (* Reverse list so newest guess is at bottom *)
+           let guesses_list_ordered = List.rev guesses_list in
            let guesses_html =
              List.map
                (fun name ->
@@ -41,7 +43,7 @@ let index req =
                     let result = Game.compare target c in
                     Game_views.guess_result c result
                   | None -> "")
-               guesses_list
+               guesses_list_ordered
              |> String.concat ""
            in
            Dream.html
@@ -77,6 +79,8 @@ let index req =
          | _ -> [])
       | None -> []
     in
+    (* Reverse list so newest guess is at bottom *)
+    let guesses_list_ordered = List.rev guesses_list in
     let guesses_html =
       List.map
         (fun name ->
@@ -85,7 +89,7 @@ let index req =
              let result = Game.compare target c in
              Game_views.guess_result c result
            | None -> "")
-        guesses_list
+        guesses_list_ordered
       |> String.concat ""
     in
     let won = Dream.session_field req "won" = Some "true" in
@@ -157,17 +161,24 @@ let guess req =
                       [%yojson_of: string list] new_guesses |> Yojson.Safe.to_string
                     in
                     (* Save game state on every guess - this prevents cheating by logout/login *)
-                    let%lwt _ =
+                    let%lwt save_result =
                       Db.save_game
                         db
                         ~user_id:uid
-                        ~character_id:1
+                        ~character_name:target.name
                         ~guesses:num_guesses
                         ~guess_names:guess_names_json
                         ~date:today
                         ~won:is_win
                     in
-                    Lwt.return_unit))
+                    match save_result with
+                    | Ok () ->
+                      if is_win
+                      then Metrics_db.increment_counter db "total_games_won"
+                      else Lwt.return_unit
+                    | Error err ->
+                      Dream.log "Error saving game: %s" (Caqti_error.show err);
+                      Lwt.return_unit))
            in
            if is_win
            then (

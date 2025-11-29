@@ -1,19 +1,19 @@
 open Asoiafdle
 
 let () =
-  let db_url =
-    Sys.getenv_opt "DATABASE_URL" |> Option.value ~default:"sqlite3:asoiafdle.db"
-  in
-  let secret =
-    Sys.getenv_opt "SESSION_SECRET"
-    |> Option.value ~default:"change_me_in_production_please"
-  in
-  Lwt_main.run (Db.init_db db_url);
+  (* Load and validate configuration *)
+  let config = Config.load_config () in
+  Config.print_startup_info config;
+  (* Initialize database *)
+  Lwt_main.run (Db.init_db config.db_url);
+  (* Start web server *)
   Dream.run ~interface:"0.0.0.0" ~port:8080
   @@ Dream.logger
-  @@ Dream.set_secret secret
-  @@ Dream.sql_pool db_url
-  @@ Dream.cookie_sessions ~lifetime:1800.0
+  @@ Dream.set_secret config.session_secret
+  @@ Dream.sql_pool config.db_url
+  @@ Dream.cookie_sessions ~lifetime:3600.0 (* 60 minutes *)
+  @@ Metrics.track_request
+  @@ Cors.create ~allowed_origin:"https://asoiafdle.duckdns.org"
   @@ Dream.router
        [ Dream.get "/" Game_handlers.index
        ; Dream.post "/guess" Game_handlers.guess
@@ -26,6 +26,9 @@ let () =
        ; Dream.post "/add-friend" Leaderboard_handlers.add_friend
        ; Dream.get "/settings" Settings_handlers.settings_get
        ; Dream.post "/settings/update" Settings_handlers.update_settings_post
+       ; Dream.post "/settings/delete" Settings_handlers.delete_account_post
+       ; Dream.get "/health" Health_handlers.health_check
+       ; Dream.get "/metrics" Health_handlers.metrics
        ; Dream.get "/static/**" (Dream.static "./static")
        ]
 ;;

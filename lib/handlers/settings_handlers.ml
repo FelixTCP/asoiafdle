@@ -131,3 +131,75 @@ let update_settings_post req =
      | None -> Dream.redirect req "/login")
   | None -> Dream.redirect req "/login"
 ;;
+
+let delete_account_post req =
+  let user_id = Dream.session_field req "user_id" in
+  match user_id with
+  | Some id_str ->
+    (match int_of_string_opt id_str with
+     | Some id ->
+       (match%lwt Dream.form req with
+        | `Ok fields ->
+          (try
+             let password = List.assoc "password" fields in
+             let confirm = List.assoc "confirm_deletion" fields in
+             (* Require exact confirmation text *)
+             if confirm <> "DELETE"
+             then
+               Dream.sql req (fun db ->
+                 let%lwt user_opt = Auth_db.get_user_by_id db id in
+                 Dream.html
+                   (Settings_views.settings_page
+                      ?user:user_opt
+                      ~error:"Please type DELETE to confirm account deletion"
+                      req))
+             else
+               Dream.sql req (fun db ->
+                 match%lwt Auth_db.get_user_by_id db id with
+                 | Some user ->
+                   let%lwt valid = Password.verify_password password user.password_hash in
+                   if not valid
+                   then
+                     Dream.html
+                       (Settings_views.settings_page
+                          ?user:(Some user)
+                          ~error:"Incorrect password"
+                          req)
+                   else (
+                     (* Delete account *)
+                     match%lwt
+                       Settings_db.delete_account db ~user_id:id
+                     with
+                     | Ok () ->
+                       (* Invalidate session *)
+                       let%lwt () = Dream.invalidate_session req in
+                       (* Redirect to register with success message *)
+                       Dream.html
+                         "<html><body><h2>Account Deleted</h2><p>Your account has been \
+                          successfully deleted. <a href='/register'>Register \
+                          again</a></p></body></html>"
+                     | Error err ->
+                       Dream.log "Error deleting account: %s" (Caqti_error.show err);
+                       Dream.html
+                         (Settings_views.settings_page
+                            ?user:(Some user)
+                            ~error:"Failed to delete account. Please try again later."
+                            req))
+                 | None -> Dream.redirect req "/login")
+           with
+           | Not_found ->
+             Dream.sql req (fun db ->
+               let%lwt user_opt = Auth_db.get_user_by_id db id in
+               Dream.html
+                 (Settings_views.settings_page
+                    ?user:user_opt
+                    ~error:"Password and confirmation required"
+                    req)))
+        | _ ->
+          Dream.sql req (fun db ->
+            let%lwt user_opt = Auth_db.get_user_by_id db id in
+            Dream.html
+              (Settings_views.settings_page ?user:user_opt ~error:"Invalid form" req)))
+     | None -> Dream.redirect req "/login")
+  | None -> Dream.redirect req "/login"
+;;

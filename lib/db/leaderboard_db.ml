@@ -4,6 +4,19 @@ let add_friend_query =
   @@ "INSERT INTO friends (user_id, friend_id) VALUES (?, ?)"
 ;;
 
+let is_already_friend_query =
+  let open Caqti_request.Infix in
+  (Caqti_type.t2 Caqti_type.int Caqti_type.int ->? Caqti_type.int)
+  @@ "SELECT 1 FROM friends WHERE user_id = ? AND friend_id = ? LIMIT 1"
+;;
+
+let is_already_friend (module Db : Caqti_lwt.CONNECTION) (user_id : int) (friend_id : int)
+  =
+  match%lwt Db.find_opt is_already_friend_query (user_id, friend_id) with
+  | Ok (Some _) -> Lwt.return true
+  | _ -> Lwt.return false
+;;
+
 let add_friend (module Db : Caqti_lwt.CONNECTION) (user_id : int) (friend_id : int) =
   Db.exec add_friend_query (user_id, friend_id)
 ;;
