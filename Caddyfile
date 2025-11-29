@@ -1,42 +1,47 @@
 asoiafdle.duckdns.org {
     # Security headers
     header {
-        # HSTS - Force HTTPS for 1 year
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
-        # Prevent MIME sniffing
-        X-Content-Type-Options "nosniff"
-        # Prevent clickjacking
-        X-Frame-Options "DENY"
-        # XSS Protection
-        X-XSS-Protection "1; mode=block"
-        # Referrer policy
-        Referrer-Policy "strict-origin-when-cross-origin"
-        # Remove server header
-        -Server
+            # HSTS - Force HTTPS for 1 year
+            Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+            # Prevent MIME sniffing
+            X-Content-Type-Options "nosniff"
+            # Prevent clickjacking
+            X-Frame-Options "DENY"
+            # XSS Protection
+            X-XSS-Protection "1; mode=block"
+            # Referrer policy
+            Referrer-Policy "strict-origin-when-cross-origin"
+            # Remove server header
+            -Server
     }
-    
+
     # Gzip compression
     encode gzip
-    
+
     # Cache CSS files - shorter cache since Tailwind classes change on deploy
     @css path *.css
-    header @css Cache-Control "public, max-age=3600"  # 1 hour
-    
+    header @css Cache-Control "public, max-age=3600" # 1 hour
+
     # Cache fonts and images - long cache (truly immutable)
     @immutable path *.woff *.woff2 *.ttf *.jpg *.jpeg *.png *.gif *.svg *.ico
-    header @immutable Cache-Control "public, max-age=31536000, immutable"  # 1 year
-    
+    header @immutable Cache-Control "public, max-age=31536000, immutable" # 1 year
+
     # Access logging
     log {
-        output file /var/log/caddy/asoiafdle-access.log
-        format json
+            output file /var/log/caddy/asoiafdle-access.log
+            format json
     }
-    
-    # Reverse proxy to application
-    reverse_proxy localhost:8080
 
-    # Reverse proxy to Grafana
+    # Grafana (Specific)
     handle_path /grafana/* {
-        reverse_proxy localhost:3000
+            reverse_proxy localhost:3000
+    }
+
+    # Redirect /grafana to /grafana/ (Grafana needs trailing slash for subpath)
+    redir /grafana /grafana/
+
+    # App (Fallback) - Matches everything else
+    handle {
+            reverse_proxy localhost:8080
     }
 }

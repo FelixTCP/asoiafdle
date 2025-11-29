@@ -18,3 +18,5 @@ Thumbs.db
 # Secret Sauce :) - Keep source private, but allow encrypted version
 lib/utils/daily_selector.ml
 !lib/utils/daily_selector.ml.enc
+
+oci-instance-retry.sh
