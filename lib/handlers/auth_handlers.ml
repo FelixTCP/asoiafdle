@@ -51,9 +51,7 @@ let register_post request =
            | None ->
              let%lwt password_hash = Password.hash_password password in
              (match%lwt Auth_db.create_user db ~email ~password_hash ~nickname with
-              | Ok _ ->
-                let%lwt () = Metrics_db.increment_counter db "total_registrations" in
-                Dream.redirect request "/login"
+              | Ok _ -> Dream.redirect request "/login"
               | Error err ->
                 Dream.log "Error creating user: %s" (Caqti_error.show err);
                 Dream.html

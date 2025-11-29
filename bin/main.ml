@@ -12,7 +12,6 @@ let () =
   @@ Dream.set_secret config.session_secret
   @@ Dream.sql_pool config.db_url
   @@ Dream.cookie_sessions ~lifetime:3600.0 (* 60 minutes *)
-  @@ Metrics.track_request
   @@ Cors.create ~allowed_origin:"https://asoiafdle.duckdns.org"
   @@ Dream.router
        [ Dream.get "/" Game_handlers.index
@@ -28,7 +27,6 @@ let () =
        ; Dream.post "/settings/update" Settings_handlers.update_settings_post
        ; Dream.post "/settings/delete" Settings_handlers.delete_account_post
        ; Dream.get "/health" Health_handlers.health_check
-       ; Dream.get "/metrics" Health_handlers.metrics
        ; Dream.get "/static/**" (Dream.static "./static")
        ]
 ;;

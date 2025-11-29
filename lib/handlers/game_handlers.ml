@@ -172,10 +172,7 @@ let guess req =
                         ~won:is_win
                     in
                     match save_result with
-                    | Ok () ->
-                      if is_win
-                      then Metrics_db.increment_counter db "total_games_won"
-                      else Lwt.return_unit
+                    | Ok () -> Lwt.return_unit
                     | Error err ->
                       Dream.log "Error saving game: %s" (Caqti_error.show err);
                       Lwt.return_unit))
