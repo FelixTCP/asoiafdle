@@ -32,14 +32,6 @@ asoiafdle.duckdns.org {
             format json
     }
 
-    # Grafana (Specific)
-    handle_path /grafana/* {
-            reverse_proxy localhost:3000
-    }
-
-    # Redirect /grafana to /grafana/ (Grafana needs trailing slash for subpath)
-    redir /grafana /grafana/
-
     # App (Fallback) - Matches everything else
     handle {
             reverse_proxy localhost:8080
